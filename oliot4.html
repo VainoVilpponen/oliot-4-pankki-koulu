@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>Pankki</h1>
+    <input type="text" id="tilinumero" placeholder="Tilinumero">
+    <input type="text" id="saldo" placeholder="Saldo">
+    <button onclick="luoTili()">Luo tili</button>
+    <input type="text" id="maara" placeholder="Maara">
+    <button onclick="talleta()">Talleta</button>
+    <button onclick="nosta()">Nosta</button>
+    <button onclick="naytatiedot()">Naytatiedot</button>
+    <button onclick="naytahistoria()">Naytahistoria</button>
+
+    <p id="tili"></p>
+    <script>
+        let tili1;
+
+        class tili {
+            constructor(tilinumero, saldo) {
+                this.tilinumero = tilinumero;
+                this.saldo = parseFloat(saldo) || 0;
+                this.historia = [];
+            }
+            talleta(maara) {
+                const summa = parseFloat(maara) || 0;
+                const saldoEnnen = this.saldo;
+                this.saldo += summa;
+                this.historia.push({
+                    paivamaara: new Date(),
+                    tapahtuma: "Talletus",
+                    summa: summa,
+                    saldoEnnen: saldoEnnen
+                });
+            }
+            nosta(maara) {
+                if (this.saldo < maara) {
+                    alert("Saldo ei riitä");
+                    return;
+                }
+                const summa = parseFloat(maara) || 0;
+                const saldoEnnen = this.saldo;
+                this.saldo -= summa;
+                this.historia.push({
+                    paivamaara: new Date(),
+                    tapahtuma: "Nosto",
+                    summa: summa,
+                    saldoEnnen: saldoEnnen
+                });
+            }
+            naytatiedot() {
+                return "Tilinumero: " + this.tilinumero + "<br>Saldo: " + this.saldo.toFixed(2);
+            }
+            naytahistoria() {
+                let historiaHtml = "Historia:<br>";
+                for (let tapahtuma of this.historia) {
+                    historiaHtml += `${tapahtuma.paivamaara.toLocaleString()} ${tapahtuma.tapahtuma}: ${tapahtuma.summa} (saldo ennen: ${tapahtuma.saldoEnnen.toFixed(2)})<br>`;
+                }
+                return historiaHtml;
+            }
+        }
+        function luoTili() {
+            let tilinumero = document.getElementById("tilinumero").value;
+            let saldo = document.getElementById("saldo").value;
+            tili1 = new tili(tilinumero, saldo);
+            document.getElementById("tili").innerHTML = tili1.naytatiedot();
+        }
+        function talleta() {
+            if (tili1) {
+                let maara = document.getElementById("maara").value;
+                tili1.talleta(maara);
+                document.getElementById("tili").innerHTML = tili1.naytatiedot();
+            }
+        }
+        function nosta() {
+            if (tili1) {
+                let maara = document.getElementById("maara").value;
+                tili1.nosta(maara);
+                document.getElementById("tili").innerHTML = tili1.naytatiedot();
+            }
+        }
+        function naytatiedot() {
+            if (tili1) {
+                document.getElementById("tili").innerHTML = tili1.naytatiedot();
+            }
+        }
+        function naytahistoria() {
+            if (tili1) {
+                document.getElementById("tili").innerHTML = tili1.naytahistoria();
+            }
+        }
+
+    </script>
+</body>
+</html>
