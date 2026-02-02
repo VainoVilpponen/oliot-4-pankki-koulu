@@ -60,6 +60,14 @@
         }
         function luoTili() {
             let tilinumero = document.getElementById("tilinumero").value;
+            if (tilinumero.length !== 10) {
+                alert("Tilinumero täytyy olla 10 numeroa");
+                return;
+            }
+            if (!/^\d{10}$/.test(tilinumero)) {
+                alert("Tilinumero täytyy olla 10 numeroa");
+                return;
+            }
             let saldo = document.getElementById("saldo").value;
             tili1 = new tili(tilinumero, saldo);
             document.getElementById("tili").innerHTML = tili1.naytatiedot();
