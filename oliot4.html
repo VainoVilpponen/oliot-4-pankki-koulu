@@ -10,6 +10,11 @@
     <button onclick="nosta()">Nosta</button>
     <button onclick="naytatiedot()">Naytatiedot</button>
     <button onclick="naytahistoria()">Naytahistoria</button>
+    <input type="text" id="korko" placeholder="Korkoprosentti">
+    <button onclick="laskeKorko()">Laske korko</button>
+    <input type="text" id="kuukausitulot" placeholder="Kuukausitulot">
+    <input type="text" id="lainamaara" placeholder="Lainamäärä">
+    <button onclick="otaLaina()">Ota laina</button>
 
     <p id="tili"></p>
     <script>
@@ -50,16 +55,35 @@
             naytatiedot() {
                 return "Tilinumero: " + this.tilinumero + "<br>Saldo: " + this.saldo.toFixed(2);
             }
+            laskeKorko(korkoprosentti) {
+                const korko = this.saldo * (korkoprosentti / 100);
+                const saldoEnnen = this.saldo;
+                this.saldo += korko;
+                this.historia.push({
+                    paivamaara: new Date(),
+                    tapahtuma: "Korko",
+                    summa: korko,
+                    saldoEnnen: saldoEnnen
+                });
+            }
             naytahistoria() {
                 let historiaHtml = "Historia:<br>";
                 for (let tapahtuma of this.historia) {
-                    historiaHtml += `${tapahtuma.paivamaara.toLocaleString()} ${tapahtuma.tapahtuma}: ${tapahtuma.summa} (saldo ennen: ${tapahtuma.saldoEnnen.toFixed(2)})<br>`;
+                    historiaHtml += `${tapahtuma.paivamaara.toLocaleString()} ${tapahtuma.tapahtuma}: ${tapahtuma.summa.toFixed(2)} (saldo ennen: ${tapahtuma.saldoEnnen.toFixed(2)})<br>`;
                 }
                 return historiaHtml;
             }
         }
         function luoTili() {
             let tilinumero = document.getElementById("tilinumero").value;
+            if (tilinumero.length !== 10) {
+                alert("Tilinumero täytyy olla 10 numeroa");
+                return;
+            }
+            if (!/^\d{10}$/.test(tilinumero)) {
+                alert("Tilinumero täytyy olla 10 numeroa");
+                return;
+            }
             let saldo = document.getElementById("saldo").value;
             tili1 = new tili(tilinumero, saldo);
             document.getElementById("tili").innerHTML = tili1.naytatiedot();
@@ -86,6 +110,31 @@
         function naytahistoria() {
             if (tili1) {
                 document.getElementById("tili").innerHTML = tili1.naytahistoria();
+            }
+        }
+        function laskeKorko() {
+            if (tili1) {
+                let korko = document.getElementById("korko").value;
+                tili1.laskeKorko(parseFloat(korko) || 0);
+                document.getElementById("tili").innerHTML = tili1.naytatiedot();
+            }
+        }
+        function otaLaina() {
+            if (tili1) {
+                let kuukausitulot = document.getElementById("kuukausitulot").value;
+                let lainamaara = document.getElementById("lainamaara").value;
+                if (kuukausitulot * 0.25 < lainamaara) {
+                    alert("Lainamaara ei saa olla suurempi ku 25% kuukausituloista");
+                    return;
+                }
+                tili1.saldo += parseFloat(lainamaara) || 0;
+                tili1.historia.push({
+                    paivamaara: new Date(),
+                    tapahtuma: "Laina",
+                    summa: parseFloat(lainamaara) || 0,
+                    saldoEnnen: tili1.saldo - parseFloat(lainamaara) || 0
+                });
+                document.getElementById("tili").innerHTML = tili1.naytatiedot();
             }
         }
 
